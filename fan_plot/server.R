@@ -16,7 +16,7 @@ shinyServer(function(input, output) {
     N <- as.integer(input$N)
     lapply(1:N, function(i) {
       numericInput(paste0("x_", i),
-                   paste0("X_", i),
+                   i,
                    value = 75,
                    min = 1,
                    max = 100,
@@ -32,7 +32,7 @@ shinyServer(function(input, output) {
     N <- as.integer(input$N)
     lapply(1:N, function(i) {
       numericInput(paste0("y_", i),
-                   paste0("Y_", i),
+                   i,
                    value = 100,
                    min = 1,
                    max = 120,
@@ -79,8 +79,11 @@ shinyServer(function(input, output) {
      colores <- brewer.pal(max(length(x),3), input$color)
      titulo <- input$titulo
      orden <- input$order
-
-     print_plot(titulo = titulo, x=x, y=y, orden = orden, colores=colores)
+     y_label <- input$Y_label
+     x_label <- input$X_label
+     print_plot(titulo = titulo, x=x, y=y, orden = orden, 
+                colores=colores, Y_label = y_label,
+                X_label = x_label)
     
   })
 

@@ -1,28 +1,30 @@
 library(shiny)
 library(shinythemes)
 
-shinyUI(fluidPage(theme = shinytheme("readable"), 
+shinyUI(fluidPage( theme = shinytheme("cerulean"), 
 
   # Application title
   titlePanel("Fan Plot"),
-  
-  fluidRow(
+  wellPanel(fluidRow(
     column(3,
-           numericInput("N",
-                        label = h3("Total de elementos"),
+           h4("Input Size"),
+           numericInput("N", 
+                        label = "",
                         value = NA,
                         min = 1,
-                        max = 12,
+                        max = 9,
                         step = 1)
     ),
     column(3,
+           h4("Plot Title"),
            textInput("titulo",
-                     label = h3("Plot Title"),
+                     label = "",
                      value = "Plot Title")
     ),
     column(3,
+           h4("Color Scheme"),
            selectInput("color",
-                       label = h3("Colors set"),
+                       label = "",
                        choices = list("Greens" = "Greens",
                                       "Blues" = "Blues",
                                       "Oranges" = "Oranges",
@@ -40,27 +42,41 @@ shinyUI(fluidPage(theme = shinytheme("readable"),
            
     ),
     column(3,
-           radioButtons("order", label = h3("Order"),
+           h4("Order"),
+           radioButtons("order", 
+                        label = "",
                         choices = list("None" = "No",
                                        "X variable" = "X",
                                        "Y variable" = "Y"),
                         selected = "No")
     )
-  ),
-  
-  fluidRow(
-    column(2,
+  )),
+  wellPanel(fluidRow(
+    
+    column(2, align = "center",
+           h3("Variable 1"),
+           textInput("X_label",
+                     "",
+                     placeholder  = "Variable name"),
            wellPanel(
              uiOutput("input_x"))),
-    column(2,
+    column(2, align = "center",
+           h3("Variable 2"),
+           textInput("Y_label",
+                     "",
+                     placeholder  = "Variable name"),
            wellPanel(
              uiOutput("input_y"))),
-    column(8,
+    column(8, align = "center",
            plotOutput("fanPlot"))
-  ),
+    
+  ))
+  ,
   
   fluidRow(
+    wellPanel(
     column(12,
-           textOutput("footer")))
+           h6("Footer")))
+  )
   
 ))
