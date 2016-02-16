@@ -46,7 +46,7 @@ obten_k <- function(x, y){
 #### Creación de la grafica ####
 print_plot <- function(titulo="Main Title", x, y, orden="No", 
                        Y_label="Afinidad", X_label="Penetración", max_side = 5,
-                       colores = brewer.pal(N, "Set3")){
+                       colores = brewer.pal(length(x), "Set3")){
   orden_indices <- 1:length(x) #Orden de indices original
   #se preserva el color por triangulo
   if( orden == "X"){
@@ -86,17 +86,15 @@ print_plot <- function(titulo="Main Title", x, y, orden="No",
   #Calculando los catetos opuestos
   cat_op <- x_mod
   cat_max <- max(cat_op)
-  #Eje Y
   
+  #Eje Y
   Ym <- mean(ylim)
   Y_0 <- (Ym-(cat_max/2))
   Y_max <- (Ym+(cat_max/2))
-  Y100 <- ((Y_max - Y_0)/round(max(x)) * 100 ) + Y_0
-  Y_labels <- c("0", round(max(x)*100))
+  Y_labels <- c("0", round(max(x), 2))
   Y_at <- c(Y_0, Y_max )
   axis(2, col.axis = "black", at = Y_at,
        labels = Y_labels)
-  #dev.off()
 }
 
 

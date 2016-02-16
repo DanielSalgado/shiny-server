@@ -48,7 +48,16 @@ shinyUI(fluidPage(theme = shinytheme("readable"),
     )
   ),
   
-  
+  fluidRow(
+    column(2,
+           wellPanel(
+             uiOutput("input_x"))),
+    column(2,
+           wellPanel(
+             uiOutput("input_y"))),
+    column(8,
+           plotOutput("fanPlot"))
+  ),
   
   fluidRow(
     column(12,

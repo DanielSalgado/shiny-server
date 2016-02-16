@@ -53,30 +53,35 @@ shinyServer(function(input, output) {
       return()
     
     source("make_plot.R", encoding = 'UTF-8')
-    
+    x <- c(0.98861, 0.952992, 0.894802, 0.604266, 0.598053, 0.535929, 0.39387, 0.225305)#Penetración
+    y <- c(100, 100, 138, 115, 99, 147, 101, 106)#Afinidad
     N <- input$N
     # Necesitamos x, y, target,
     # Orden, Y_label, X_label, colores
     input_values <- reactiveValuesToList(input)
     x_index <- grep("x+", names(input_values), perl=TRUE)
     y_index <- grep("y+", names(input_values), perl=TRUE)
-    x <- c()
-    for (i in 1:length(x_index)){
-      x <- c(x, input_values[[x_index[i]]])
+   
+    if(length(x_index > 0)){
+      x <- c()
+      for (i in 1:length(x_index)){
+        x <- c(x, input_values[[x_index[i]]])
+      }
     }
-    y <- c()
-    for (j in 1:length(y_index)){
-      y <- c(y, input_values[[y_index[j]]])
+    
+    if(length(y_index > 0)){
+      y <- c()
+      for (j in 1:length(y_index)){
+        y <- c(y, input_values[[y_index[j]]])
+      }
     }
-     
-#     x <- c(0.98861, 0.952992, 0.894802, 0.604266, 0.598053, 0.535929, 0.39387, 0.225305)#Penetración
-#     y <- c(100, 100, 138, 115, 99, 147, 101, 106)#Afinidad
+
      colores <- brewer.pal(max(length(x),3), input$color)
      titulo <- input$titulo
      orden <- input$order
 
      print_plot(titulo = titulo, x=x, y=y, orden = orden, colores=colores)
-
+    
   })
 
 })
