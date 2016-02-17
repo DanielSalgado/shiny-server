@@ -6,14 +6,14 @@
 #
 
 library(shiny)
+library(RColorBrewer)
+library(rootSolve)
+source("make_plot.R", encoding = 'UTF-8')
 
 shinyServer(function(input, output) {
   
   output$input_x <- renderUI({
-    if(is.null(input$N) | is.na(input$N))
-      return()
-    
-    N <- as.integer(input$N)
+    N <- get_N()
     lapply(1:N, function(i) {
       numericInput(paste0("x_", i),
                    i,
@@ -26,10 +26,7 @@ shinyServer(function(input, output) {
   })
   
   output$input_y <- renderUI({
-    if(is.null(input$N) | is.na(input$N))
-      return()
-    
-    N <- as.integer(input$N)
+    N <- get_N()
     lapply(1:N, function(i) {
       numericInput(paste0("y_", i),
                    i,
@@ -48,43 +45,72 @@ shinyServer(function(input, output) {
     
   })
   
-  output$fanPlot <- renderPlot({
-    if(is.null(input$N) | is.na(input$N))
-      return()
-    
-    source("make_plot.R", encoding = 'UTF-8')
-    x <- c(0.98861, 0.952992, 0.894802, 0.604266, 0.598053, 0.535929, 0.39387, 0.225305)#Penetración
-    y <- c(100, 100, 138, 115, 99, 147, 101, 106)#Afinidad
-    N <- input$N
-    # Necesitamos x, y, target,
-    # Orden, Y_label, X_label, colores
+  get_x <- reactive({
+    N <- get_N()
     input_values <- reactiveValuesToList(input)
-    x_index <- grep("x+", names(input_values), perl=TRUE)
-    y_index <- grep("y+", names(input_values), perl=TRUE)
-   
-    if(length(x_index > 0)){
+    x_index <- grep("x+", names(input_values), perl = TRUE)
+    if(length(x_index) > 0){
       x <- c()
-      for (i in 1:length(x_index)){
+      for (i in 1:N){
         x <- c(x, input_values[[x_index[i]]])
       }
+      return(x)
+    } else {
+      return(c(.90, .90, .90))
     }
-    
-    if(length(y_index > 0)){
+  })
+  
+  get_y <- reactive({
+    N <- get_N()
+    input_values <- reactiveValuesToList(input)
+    y_index <- grep("y+", names(input_values), perl = TRUE)
+    if(length(y_index) > 0){
       y <- c()
-      for (j in 1:length(y_index)){
+      for(j in 1:N){
         y <- c(y, input_values[[y_index[j]]])
       }
+      return(y)
+    } else {
+      return(c(100, 100, 100))
     }
-
-     colores <- brewer.pal(max(length(x),3), input$color)
-     titulo <- input$titulo
-     orden <- input$order
-     y_label <- input$Y_label
-     x_label <- input$X_label
-     print_plot(titulo = titulo, x=x, y=y, orden = orden, 
-                colores=colores, Y_label = y_label,
-                X_label = x_label)
+  })
+  
+  get_colors <- reactive({
+    return(brewer.pal(input$N, input$color))
+  })
+  
+  get_N <- reactive({
+    if(is.null(input$N) | is.na(input$N)){
+      return(3)
+    } else {
+      return(input$N)
+    }
+  })
+  
+  get_title <- reactive({
+    return(input$titulo)
+  })
+  
+  get_base <- reactive({
+    return(input$X_label)
+  })
+  
+  get_height <- reactive({
+    return(input$Y_label)
+  })
+  
+  get_orden <- reactive({
+    return(input$order)
+  })
+  
+  output$fanPlot <- renderPlot({
+    print_plot(titulo = get_title(), 
+               x=get_x(),
+               y=get_y(),
+               orden = get_orden(),
+               colores = get_colors(),
+               Y_label = get_height(),
+               X_label = get_base())
     
   })
-
 })

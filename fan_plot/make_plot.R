@@ -1,8 +1,7 @@
 ### Fan Plot ###
 
 # usar la funcion polygon para pintar triangulos
-library(RColorBrewer)
-library(rootSolve)
+
 
 ### input: vector de alturas y angulos
 ### output: usa la función polygon para dibujar en una grafica los triangulos 

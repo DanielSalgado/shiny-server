@@ -8,12 +8,12 @@ shinyUI(fluidPage( theme = shinytheme("cerulean"),
   wellPanel(fluidRow(
     column(3,
            h4("Input Size"),
-           numericInput("N", 
-                        label = "",
-                        value = NA,
-                        min = 1,
-                        max = 9,
-                        step = 1)
+           sliderInput("N",
+                       label = "",
+                       value = NA,
+                       min = 3,
+                       max = 9,
+                       step = 1)
     ),
     column(3,
            h4("Plot Title"),
@@ -54,14 +54,14 @@ shinyUI(fluidPage( theme = shinytheme("cerulean"),
   wellPanel(fluidRow(
     
     column(2, align = "center",
-           h3("Variable 1"),
+           h4("Triangle base"),
            textInput("X_label",
                      "",
                      placeholder  = "Variable name"),
            wellPanel(
              uiOutput("input_x"))),
     column(2, align = "center",
-           h3("Variable 2"),
+           h4("Triangle height"),
            textInput("Y_label",
                      "",
                      placeholder  = "Variable name"),
@@ -76,7 +76,7 @@ shinyUI(fluidPage( theme = shinytheme("cerulean"),
   fluidRow(
     wellPanel(
     column(12,
-           h6("Footer")))
+           textOutput("footer")))
   )
   
 ))
