@@ -1,19 +1,21 @@
-
-# This is the server logic for a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
-#
-
 library(shiny)
 library(RColorBrewer)
 library(rootSolve)
-source("make_plot.R", encoding = 'UTF-8')
+source("make_plot2.R", encoding = 'UTF-8')
 
 shinyServer(function(input, output) {
   
+  # To test the input values.
+  output$footer <- renderText({
+    N <- input$N
+    
+    expr <- unlist( reactiveValuesToList(input))
+    
+  })
+  
+  # Reactive ui, prints input for x
   output$input_x <- renderUI({
-    N <- get_N()
+    N <- input$N
     lapply(1:N, function(i) {
       numericInput(paste0("x_", i),
                    i,
@@ -21,12 +23,13 @@ shinyServer(function(input, output) {
                    min = 1,
                    max = 100,
                    step = 1
-                   )
+      )
     })
   })
   
+  # Reactive ui, prints input for y
   output$input_y <- renderUI({
-    N <- get_N()
+    N <- input$N
     lapply(1:N, function(i) {
       numericInput(paste0("y_", i),
                    i,
@@ -37,16 +40,10 @@ shinyServer(function(input, output) {
       )
     })
   })
-
-  output$footer <- renderText({
-    N <- input$N
-    
-    expr <- unlist( reactiveValuesToList(input))
-    
-  })
   
+  # Reactive function, gets x values.
   get_x <- reactive({
-    N <- get_N()
+    N <- input$N
     input_values <- reactiveValuesToList(input)
     x_index <- grep("x+", names(input_values), perl = TRUE)
     if(length(x_index) > 0){
@@ -60,8 +57,9 @@ shinyServer(function(input, output) {
     }
   })
   
+  # Reactive function, gets y values.
   get_y <- reactive({
-    N <- get_N()
+    N <- input$N
     input_values <- reactiveValuesToList(input)
     y_index <- grep("y+", names(input_values), perl = TRUE)
     if(length(y_index) > 0){
@@ -75,42 +73,27 @@ shinyServer(function(input, output) {
     }
   })
   
-  get_colors <- reactive({
-    return(brewer.pal(input$N, input$color))
+  # Gets bases and heights in a df
+  modify_input <- reactive({
+    df <- get_height_and_bases(get_x(), get_y())
+    return(df)
   })
   
-  get_N <- reactive({
-    if(is.null(input$N) | is.na(input$N)){
-      return(3)
-    } else {
-      return(input$N)
-    }
+  # Orders the bases and heights in a df
+  final_index <- reactive({
+    df <- modify_input()
+    index <- orderInput(df$bases, df$alturas, input$order)
+    return(index)
   })
   
-  get_title <- reactive({
-    return(input$titulo)
-  })
-  
-  get_base <- reactive({
-    return(input$X_label)
-  })
-  
-  get_height <- reactive({
-    return(input$Y_label)
-  })
-  
-  get_orden <- reactive({
-    return(input$order)
-  })
-  
+  # Draws the fan plot
   output$fanPlot <- renderPlot({
-    print_plot(titulo = get_title(), 
-               x=get_x(),
-               y=get_y(),
-               orden = get_orden(),
-               colores = get_colors(),
-               Y_label = get_height(),
-               X_label = get_base())
-    
+    base_plot(input$base_label, input$height_label, input$titulo)
+    index <- final_index()
+    df <- modify_input()
+    df <- df[index, ]
+    colores <- brewer.pal(length(index), input$color)[index]
+    plot_triangles(df$bases, df$alturas, colores)
+    plot_axes(max_base = max(get_x()), max_altura = max(get_y()), cat_max = max(df$bases) )
   })
 })
