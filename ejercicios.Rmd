@@ -1,0 +1,85 @@
+---
+title: "Respuestas a los ejercicios de ggplot2 Elegant Graphics for Data Analysis"
+author: "Daniel Salgado"
+date: "17/1/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, out.width = "500px", dpi = 200)
+```
+
+Este documento fue escrito para guardar las respuestas a los ejercicios (no todos) del libro "ggplot2 Elegant Graphics for Data Analysis de Hadley Wickham". La idea de este documento es aprovechar las ventajas de R Marckdown, incluyendo en la medida de lo posible gráficas interactivas con la ayuda de *Shiny*
+
+## Chapter 2
+
+Los primeros ejercicios utilizan los datos de *mpg*, cargemos los datos.
+```{r, warning=FALSE}
+library(ggplot2)
+mpg
+```
+
+Ya con los datos cargados podemos reproducir la primer gráfica del libro.
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point()
+```
+
+Esta gráfica muestra en el eje vertical las millas por galon en carretera (variable *hwy*) de los modelos registrados en el dataset, en el eje horizontal tenemos la variable *displ* que representa el desplazamiento del motor.
+
+### 2.3.1 Answers 
+
+####1 
+La relaciòn entre *cty* (las millas por galon en ciudad) y *hwy* se puede observar claramente en la siguiente gráfica.
+```{r}
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point()
+```
+
+En ella vemos que existe una fuerte correlación positiva entre estas dos variables, la mayoría de los puntos que observamos se ubican al rededor de la identidad, es decir, el rendimiento en carretera de un determinado modelo de auto es similar a su rendimiento en ciudad.
+
+####2
+Al gráficar
+```{r}
+ggplot(mpg, aes(model, manufacturer)) +
+  geom_point()
+```
+
+Se crea una gráfica en de disperción de dos variables categoricas, en el eje x tenemos el modelo de todas nuestras observaciones y en el vertical las marcas de autos.
+
+####3
+#####a)
+```{r}
+ggplot(mpg, aes(cty, hwy)) + geom_point()
+```
+
+data: mpg
+aesthetic: x -> hwy; y -> cty
+layers: geom_point: gráfica de dispersión
+
+```{r}
+ggplot(diamonds, aes(carat, price)) + geom_point()
+```
+
+data: diamonds
+aesthetics: x -> price; y -> carat
+layers: gráfica de dispersión
+
+```{r}
+ggplot(economics, aes(date, unemploy)) + geom_line()
+```
+
+data:economics
+aesthetics: x -> date; y -> unemploy
+layers: gráfica de lineas
+
+```{r}
+ggplot(mpg, aes(cty)) + geom_histogram()
+```
+
+data: mpg
+aesthetics: x -> cty
+layers: histográma de cty
+
+
+
