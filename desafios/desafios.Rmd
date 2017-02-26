@@ -6,7 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
-#library(ggcorrplot)
+library(ggcorrplot)
 library(class)
 library(MASS)
 ```
@@ -55,10 +55,10 @@ Las variables *v1* y *v2* toman valores similares, mientra que *v2* toma valores
 Busquemos si existe alguna correlación entre las variables que queremos utilizar para crear el modelo.
 
 ```{r}
-# corr <- round(cor(df), 3)
-# ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
-#    outline.col = "white",
-#    colors = c("#6D9EC1", "white", "#E46726"))
+corr <- round(cor(df), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
 ```
 
 La correlación entre *v2* y *v3* es más alta de lo ideal, sin embargo, la que existe entre *v3* y *v1* es cercana a 0 y tambien lo es la existente entre *v1* y *v2*.
@@ -163,11 +163,11 @@ ggplot(tidy, aes(y=value, x=variable)) + geom_boxplot() + scale_y_log10()
 La variable *v4* presenta mucha más variacion que las primeras dos, revisemos si existen correlaciones fuertes entre nusetras variables explicativas. 
 
 ```{r}
-# corr <- round(cor(df[,-5]), 3)
-# ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
-#    outline.col = "white",
-#    colors = c("#6D9EC1", "white", "#E46726"))
-# rm(corr)
+corr <- round(cor(df[,-5]), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
+rm(corr)
 ```
 
 ```{r}
