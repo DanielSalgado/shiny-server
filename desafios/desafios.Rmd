@@ -1,30 +1,179 @@
 ---
 title: "Desafios"
-author: "Daniel Salgado"
-date: "26/2/2017"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggcorrplot)
+library(class)
+library(MASS)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+##Hacerla de Jamón
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+*** 
+Una tribu pacífica de la isla tiene un concurso legendario de jamones. El jurado es muy longevo y este año ha perdido a más de la mitad de sus miembros. La tribu te ha enviado una base de datos (*score_de_jamonosidad.csv*) de los últimos concursos. En esta base de datos se enlistan distintos especímenes de jamones con la calificación que el jurado otorgó a cada uno. También has recibido una base de datos de jamones no calificados (*jamones_por_calificar.csv*) que deberás calificar, honrando el espíritu del jurado.
+Para este desafío, puedes usar **R** o Python.
 
-```{r cars}
-summary(cars)
+A.	Explica con dibujos, diagramas, ecuaciones, etc tu modelo.
+B.	Implementa tu modelo indicando los comandos que usas.
+C.	Completa el archivo jamones_por_calificar.csv con tu veredicto.
+
+*** 
+
+El reto pide primero explicar el modelo con dibujos, diagramas, ecuaciones, etc.
+Para poder hacer eso, lo primero es saber que modelo se va a ocupar y uno no sabe que modelo es el que dara mejor respuesta a un problema hasta que hace un análisis exploratorio de los datos y se da una idea general de ellos. Realicemos primero este análisis.
+
+#### Análisis exploratorio de los datos
+
+```{r}
+df <- read.csv("data_frames/Copia de score_de_jamonosidad.csv")
+summary(df)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Vemos que contamos con 5 variables, todas numericas, la primer variable tiene el nombre *jamon* por lo que seguramente es el id asignado a cada uno de los jamones evaluados, la segunda variable *score* corresponde a la calificación asignada a cada jamon, es la variable a modelar. Las variables *v1*, *v2* y *v3* representan atributos numericos de cada jamon en base a los cuales debemos determinar su *score*.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Veamos un poco más como se comportan los datos.
+
+```{r, echo=FALSE}
+tidy <- gather(df, variable, x, 3:5)
+ggplot(data=tidy, aes(score)) + geom_bar()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+La variable *score* es discreta y toma valores desde 0 hasta 13, el valor con más apariciones es 10 y su media es 6.9.
+
+```{r}
+ggplot(tidy, aes(y=x, x=variable)) + geom_boxplot() + scale_y_log10()
+```
+
+Las variables *v1* y *v2* toman valores similares, mientra que *v2* toma valores siempre inferiores a 100.
+
+Busquemos si existe alguna correlación entre las variables que queremos utilizar para crear el modelo.
+
+```{r}
+corr <- round(cor(df), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
+```
+
+La correlación entre *v2* y *v3* es más alta de lo ideal, sin embargo, la que existe entre *v3* y *v1* es cercana a 0 y tambien lo es la existente entre *v1* y *v2*.
+
+
+###Clasificación
+
+Tomemos el 80% de las observaciones en el dataframe como set de entrenamiento.
+Preparemos los argumentos que recibirá la función *knn()*
+
+```{r}
+set.seed(1234)
+train <- sample(1:28, size=round(0.8*28, 0), replace = FALSE)
+test <- c(1:28)[-train]
+train_set <- df[train, c("v1", "v2", "v3")]
+test_set <- df[test, c("v1", "v2", "v3")]
+train_scores <- df[train, "score"]
+test_scores <- df[test, "score"]
+```
+
+
+```{r}
+set.seed(1234)
+knn_pred <- knn(train_set, test_set, train_scores, k=13)
+table(knn_pred, test_scores)
+mse_knn <- mean((as.numeric(knn_pred)- test_scores)^2)
+```
+
+Ninguna predicción fue acertada :( 
+
+Intentemos utilizar un modelo de regresión lineal.
+
+```{r}
+lm_model <- lm(score ~ v1 + v2 + v3, data=df[train, ])
+lm_pred <- predict(lm_model, test_set)
+mse <- mean(((lm_pred - test_scores)^2))
+```
+
+Una predicción fue acertada bajo el modelo con intercepto, veamos como sale removiendo el intercepto.
+
+```{r}
+lm_model_0 <- lm(score ~ 0 + v1 + v2 + v3, data=df[train, ])
+lm_pred_0 <- predict(lm_model_0, test_set)
+mse_0 <- mean(((lm_pred_0 - test_scores)^2))
+```
+
+Modelo utilizando Linear Discriminant Analysis
+
+```{r}
+lda_fit <- lda(score ~ v1 + v2 + v3, data=df, subset = train)
+lda_pred <- predict(lda_fit, test_set)
+mse_lda <- mean(((as.numeric(lda_pred$class) - test_scores)^2))
+```
+
+Vemos que el modelo que utiliza LDA tiene un *mse* de 2, este será el modelo utilizado para realizar las predicciones finales.
+
+```{r}
+final_model <- lda(score ~ v1 + v2 + v3, data=df)
+```
+
+Realizemos las predicciones de los datos en el archivo de jamones por calificar.
+
+```{r}
+prediction_df <- read.csv("data_frames/Copia de jamones_por_calificar.csv")
+prediction <- predict(final_model, prediction_df[,c("v1", "v2", "v3")])
+```
+
+guardemos las predicciones en archivo.
+
+```{r}
+prediction_df$score <- as.numeric(prediction$class)
+write.csv(prediction_df, "results/jamones_calificados_lda.csv", row.names = FALSE)
+```
+
+##El Seductor Canto de las Sirenas
+
+*** 
+Las sirenas endémicas que rodean la isla donde se encuentra tu celda tienen un seductor canto con el que atraen a sus machos y aseguran la persistencia de sus especie.  Ha emigrado, solicitando refugio, una especie de sirenas de otros lares. Esta especie emite un sonido que interfiere con el canto de las sirenas endémicas. El guardián del océano va a delimitar una región para cada especie y pide tu ayuda para distribuirlas. Tú recibiste una base de datos (*sirenas_endemicas_y_sirenas_migrantes_historico.csv*) que el museo de historia natural te ha facilitado con características de individuos de cada especie. Recibiste también una base de datos con los individuos que el guardián va a clasificar (*sirenas_endemicas_y_sirenas_migrantes.csv)*. Indica en esta última, a qué especie de sirena pertenece cada individuo.
+Para este desafío, puedes usar **R** o Python.
+
+A.	Explica con dibujos, diagramas o palabras tu modelo de clasificación.
+B.	Implementa tu modelo indicando los comandos que usas.
+C.	Completa el archivo (sirenas_endemicas_y_sirenas_migrantes.csv  que entregarás al guardián.
+*** 
+
+Este ejercicio es un problema de clasificación, la metodología que se utilizara es similar a la del desafio *para hacerla de jamón*.
+
+#### Análisis exploratorio.
+
+```{r}
+df <- read.csv("data_frames/Copia de sirenas_endemicas_y_sirenas_migrantes_historico.csv")
+summary(df)
+```
+
+En este caso la especie una variable solamente con dos niveles, tenemos 100 observaciones en nuestro data frame y contamos con cuatro variables explicativas, todas ellas numericas. 
+
+```{r}
+tidy <- gather(df, variable, value, 1:4)
+ggplot(tidy, aes(y=value, x=variable)) + geom_boxplot() + scale_y_log10()
+```
+
+La variable *v4* presenta mucha más variacion que las primeras dos, revisemos si existen correlaciones fuertes entre nusetras variables explicativas. 
+
+```{r}
+corr <- round(cor(df[,-5]), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
+rm(corr)
+```
+
+```{r}
+plot(df[,-5])
+```
+
+Existen varias correlaciones fuertes, intentaremos construir un modelo con todas las variables y despues, si da tiempo, utilizaremos principal component analysis.
+
+
