@@ -1,0 +1,30 @@
+---
+title: "Para hacerla de jamón"
+author: "Daniel Salgado"
+date: "26/2/2017"
+output: html_document
+---
+*** 
+Una tribu pacífica de la isla tiene un concurso legendario de jamones. El jurado es muy longevo y este año ha perdido a más de la mitad de sus miembros. La tribu te ha enviado una base de datos (*score_de_jamonosidad.csv*) de los últimos concursos. En esta base de datos se enlistan distintos especímenes de jamones con la calificación que el jurado otorgó a cada uno. También has recibido una base de datos de jamones no calificados (*jamones_por_calificar.csv*) que deberás calificar, honrando el espíritu del jurado.
+Para este desafío, puedes usar **R** o Python.
+
+A.	Explica con dibujos, diagramas, ecuaciones, etc tu modelo.
+B.	Implementa tu modelo indicando los comandos que usas.
+C.	Completa el archivo jamones_por_calificar.csv con tu veredicto.
+
+*** 
+
+El reto pide primero explicar el modelo con dibujos, diagramas, ecuaciones, etc.
+Para poder hacer eso, lo primero es saber que modelo se va a ocupar y uno no sabe que modelo es el que dara mejor respuesta a un problema hasta que hace un análisis exploratorio de los datos y se da una idea general de ellos. Realicemos primero este análisis.
+
+#### Análisis exploratorio de los datos
+
+```{r}
+df <- read.csv("data_frames/Copia de score_de_jamonosidad.csv")
+summary(df)
+```
+
+
+Vemos que contamos con 5 variables, todas numericas, la primer variable tiene el nombre *jamon* por lo que seguramente es el id asignado a cada uno de los jamones evaluados, la segunda variable *score* corresponde a la calificación asignada a cada jamon, es la variable a modelar. Las variables *v1*, *v2* y *v3* representan atributos numericos de cada jamon en base a los cuales debemos determinar su *score*.
+
+Veamos un poco más como se comportan los datos.

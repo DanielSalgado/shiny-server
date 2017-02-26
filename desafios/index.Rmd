@@ -9,7 +9,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Desafió de Aguas venenosas
+###[Desafió de Aguas venenosas](jamon.Rmd)
+
 
 ### Desafió para hacerla de jamón
 
@@ -23,4 +24,5 @@ Los desafíos no están ordenados por orden de dificultad, así que procura leer
 Tu carcelero es un barbaján muy listo y sobretodo curioso así que si te sirves de dibujos, mapas mentales, ecuaciones, diagramas de flujo, etc, para encontrar una solución a los desafíos o bien para explicarla, ¡adelante! Te aceptará screenshots, fotos del pizarrón de tu celda o de dibujos de tu cuaderno. No tienes restricciones sobre el formato de respuesta de tus soluciones a los desafíos, salvo para los archivos, de preferencia envíalos en formato CSV.
 
 ¡Buena suerte! Recuerda que tu astucia es la llave de tu libertad.
+
 ***
