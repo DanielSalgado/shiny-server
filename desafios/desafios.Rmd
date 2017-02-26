@@ -5,9 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-install.packages("tidyverse", "ggcorrplot", "class")
 library(tidyverse)
-
 library(ggcorrplot)
 library(class)
 library(MASS)
