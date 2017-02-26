@@ -4,6 +4,15 @@ author: "Daniel Salgado"
 date: "26/2/2017"
 output: html_document
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggcorrplot)
+library(class)
+library(MASS)
+```
+
 *** 
 Una tribu pacífica de la isla tiene un concurso legendario de jamones. El jurado es muy longevo y este año ha perdido a más de la mitad de sus miembros. La tribu te ha enviado una base de datos (*score_de_jamonosidad.csv*) de los últimos concursos. En esta base de datos se enlistan distintos especímenes de jamones con la calificación que el jurado otorgó a cada uno. También has recibido una base de datos de jamones no calificados (*jamones_por_calificar.csv*) que deberás calificar, honrando el espíritu del jurado.
 Para este desafío, puedes usar **R** o Python.
