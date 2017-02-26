@@ -1,5 +1,5 @@
 ---
-title: "Respuestas a los ejercicios de ggplot2 Elegant Graphics for Data Analysis"
+title: "Respuestas a los ejercisios de ggplot2 Elegant Graphics for Data Analysis"
 author: "Daniel Salgado"
 date: "17/1/2017"
 output: html_document
@@ -69,7 +69,7 @@ layers: gráfica de dispersión
 ggplot(economics, aes(date, unemploy)) + geom_line()
 ```
 
-data:economics
+data: economics
 aesthetics: x -> date; y -> unemploy
 layers: gráfica de lineas
 
