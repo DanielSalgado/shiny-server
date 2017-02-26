@@ -11,8 +11,8 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(ggcorrplot)
-# library(class)
-# library(MASS)
+library(class)
+library(MASS)
 ```
 
 *** 
@@ -54,3 +54,83 @@ ggplot(tidy, aes(y=x, x=variable)) + geom_boxplot() + scale_y_log10()
 Las variables *v1* y *v2* toman valores similares, mientra que *v2* toma valores siempre inferiores a 100.
 
 Busquemos si existe alguna correlación entre las variables que queremos utilizar para crear el modelo.
+
+
+```{r}
+corr <- round(cor(df), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
+```
+
+La correlación entre *v2* y *v3* es más alta de lo ideal, sin embargo, la que existe entre *v3* y *v1* es cercana a 0 y tambien lo es la existente entre *v1* y *v2*.
+
+
+###Clasificación
+
+Tomemos el 80% de las observaciones en el dataframe como set de entrenamiento.
+Preparemos los argumentos que recibirá la función *knn()*
+
+```{r}
+set.seed(1234)
+train <- sample(1:28, size=round(0.8*28, 0), replace = FALSE)
+test <- c(1:28)[-train]
+train_set <- df[train, c("v1", "v2", "v3")]
+test_set <- df[test, c("v1", "v2", "v3")]
+train_scores <- df[train, "score"]
+test_scores <- df[test, "score"]
+```
+
+
+```{r}
+set.seed(1234)
+knn_pred <- knn(train_set, test_set, train_scores, k=13)
+table(knn_pred, test_scores)
+mse_knn <- mean((as.numeric(knn_pred)- test_scores)^2)
+```
+
+Ninguna predicción fue acertada :( 
+
+Intentemos utilizar un modelo de regresión lineal.
+
+```{r}
+lm_model <- lm(score ~ v1 + v2 + v3, data=df[train, ])
+lm_pred <- predict(lm_model, test_set)
+mse <- mean(((lm_pred - test_scores)^2))
+```
+
+Una predicción fue acertada bajo el modelo con intercepto, veamos como sale removiendo el intercepto.
+
+```{r}
+lm_model_0 <- lm(score ~ 0 + v1 + v2 + v3, data=df[train, ])
+lm_pred_0 <- predict(lm_model_0, test_set)
+mse_0 <- mean(((lm_pred_0 - test_scores)^2))
+```
+
+Modelo utilizando Linear Discriminant Analysis
+
+```{r}
+lda_fit <- lda(score ~ v1 + v2 + v3, data=df, subset = train)
+lda_pred <- predict(lda_fit, test_set)
+mse_lda <- mean(((as.numeric(lda_pred$class) - test_scores)^2))
+```
+
+Vemos que el modelo que utiliza LDA tiene un *mse* de 2, este será el modelo utilizado para realizar las predicciones finales.
+
+```{r}
+final_model <- lda(score ~ v1 + v2 + v3, data=df)
+```
+
+Realizemos las predicciones de los datos en el archivo de jamones por calificar.
+
+```{r}
+prediction_df <- read.csv("data_frames/Copia de jamones_por_calificar.csv")
+prediction <- predict(final_model, prediction_df[,c("v1", "v2", "v3")])
+```
+
+guardemos las predicciones en archivo.
+
+```{r}
+prediction_df$score <- as.numeric(prediction$class)
+write.csv(prediction_df, "results/jamones_calificados_lda.csv", row.names = FALSE)
+```
