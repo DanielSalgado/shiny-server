@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(knitr)
 library(ggcorrplot)
 library(class)
 library(MASS)
@@ -41,21 +42,24 @@ tidy <- gather(df, variable, value, 1:4)
 ggplot(tidy, aes(y=value, x=variable)) + geom_boxplot() + scale_y_log10()
 ```
 
-La variable *v4* presenta mucha más variacion que las primeras dos, revisemos si existen correlaciones fuertes entre nusetras variables explicativas. 
+La variable *v4* presenta un rango mucho más amplio que las primeras dos, revisemos si existen correlaciones fuertes entre nusetras variables explicativas. 
 
 ```{r}
 corr <- round(cor(df[,-5]), 3)
 ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
    outline.col = "white",
    colors = c("#6D9EC1", "white", "#E46726"))
-rm(corr)
 ```
+
+Hay fuertes correlaciones entre nuestras variables, principalmente entre *v1* y *v3* y entre *v3* y *v4*. Veamos como lucen las gráficas de correlacion de las variables.
 
 ```{r}
 plot(df[,-5])
 ```
 
-Existen varias correlaciones fuertes, intentaremos construir un modelo con todas las variables y despues, si da tiempo, utilizaremos principal component analysis.
+se pueden apreciar claros clusters dentro de nuestra gráfica, esto sera util durante la creaciòn del modelo.
+
+Definamos el conjunto de datos de entrenamiento y el de prueba.
 
 ```{r}
 set.seed(1234)
@@ -67,11 +71,12 @@ train_scores <- df[train, "especie"]
 test_scores <- df[test, "especie"]
 ```
 
+Primero ajustemos un modelo de *knn* usando *$k=2$*
 
-```{r}
+```{r, out.width=7}
 set.seed(1234)
 knn_pred <- knn(train_set, test_set, train_scores, k=2)
-table(knn_pred, test_scores)
+kable(table(knn_pred, test_scores), align="l")
 ```
 
 Con este modelo tenemos todos nuestros datos en el dataset de prueba bien clasificados, las 9 sirenas endemicas fueron clasificadas como tal y las 11 sirenas migrantes.
