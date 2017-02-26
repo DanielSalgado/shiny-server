@@ -7,8 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#library(tidyverse)
-# library(ggcorrplot)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(ggcorrplot)
 # library(class)
 # library(MASS)
 ```
@@ -37,3 +39,18 @@ summary(df)
 Vemos que contamos con 5 variables, todas numericas, la primer variable tiene el nombre *jamon* por lo que seguramente es el id asignado a cada uno de los jamones evaluados, la segunda variable *score* corresponde a la calificación asignada a cada jamon, es la variable a modelar. Las variables *v1*, *v2* y *v3* representan atributos numericos de cada jamon en base a los cuales debemos determinar su *score*.
 
 Veamos un poco más como se comportan los datos.
+
+```{r, echo=FALSE}
+tidy <- gather(df, variable, x, 3:5)
+ggplot(data=tidy, aes(score)) + geom_bar()
+```
+
+La variable *score* es discreta y toma valores desde 0 hasta 13, el valor con más apariciones es 10 y su media es 6.9.
+
+```{r}
+ggplot(tidy, aes(y=x, x=variable)) + geom_boxplot() + scale_y_log10()
+```
+
+Las variables *v1* y *v2* toman valores similares, mientra que *v2* toma valores siempre inferiores a 100.
+
+Busquemos si existe alguna correlación entre las variables que queremos utilizar para crear el modelo.
