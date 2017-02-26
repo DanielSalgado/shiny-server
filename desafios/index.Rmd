@@ -1,23 +1,18 @@
 ---
 title: "Desafios"
 author: "Daniel Salgado"
-date: "26/2/2017"
+date: "26 de febrero de 2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+###Desafio de Aguas venenosas
 
-###[Desafió de Aguas venenosas](jamon.Rmd)
+###[Desafio para hacerla de jamón](jamon.Rmd)
 
-
-### Desafió para hacerla de jamón
-
-### Desafío El Seductor Canto de las Sirenas
+###[Desafio El Seductor Canto de las Sirenas](sirenas.Rmd)
 
 ***
-Malas noticias, estás pres@ en una isla muy lejana, no te angusties, tienes una computadora, internet, comida y asilo. Tu carcelero ha accedido a darte una oportunidad: para salir tienes que resolver tres desafíos, así que sólo tu astucia puede salvarte de quedar, para siempre, aislado. 
+Malas noticias, estás pres@ en una isla muy lejana, no te angusties, tienes una computadora, internet, comida y asilo. Tu carcelero ha accedido a darte una oportunidad: para salir tienes que resolver tres desafíos, así que sólo tu astucia puede salvarte de quedar, para siempre, aislado.
 
 Los desafíos no están ordenados por orden de dificultad, así que procura leerlos y luego resolverlos en el orden que te sea más cómodo.
 
@@ -25,4 +20,4 @@ Tu carcelero es un barbaján muy listo y sobretodo curioso así que si te sirves
 
 ¡Buena suerte! Recuerda que tu astucia es la llave de tu libertad.
 
-***
+

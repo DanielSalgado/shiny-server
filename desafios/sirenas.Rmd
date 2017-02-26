@@ -1,0 +1,108 @@
+---
+title: "Desafio El Seductor Canto de las Sirenas"
+author: "Daniel Salgado"
+date: "26 de febrero de 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(ggcorrplot)
+library(class)
+library(MASS)
+```
+
+*** 
+Las sirenas endémicas que rodean la isla donde se encuentra tu celda tienen un seductor canto con el que atraen a sus machos y aseguran la persistencia de sus especie.  Ha emigrado, solicitando refugio, una especie de sirenas de otros lares. Esta especie emite un sonido que interfiere con el canto de las sirenas endémicas. El guardián del océano va a delimitar una región para cada especie y pide tu ayuda para distribuirlas. Tú recibiste una base de datos (*sirenas_endemicas_y_sirenas_migrantes_historico.csv*) que el museo de historia natural te ha facilitado con características de individuos de cada especie. Recibiste también una base de datos con los individuos que el guardián va a clasificar (*sirenas_endemicas_y_sirenas_migrantes.csv)*. Indica en esta última, a qué especie de sirena pertenece cada individuo.
+Para este desafío, puedes usar **R** o Python.
+
+A.	Explica con dibujos, diagramas o palabras tu modelo de clasificación.
+B.	Implementa tu modelo indicando los comandos que usas.
+C.	Completa el archivo (sirenas_endemicas_y_sirenas_migrantes.csv  que entregarás al guardián.
+
+*** 
+
+Este ejercicio es un problema de clasificación, la metodología que se utilizara es similar a la del desafio *[para hacerla de jamón](jamon.Rmd)*, primero realizaremos un análisis exploratorio de los datos y despues procederemos a crear varios modelos para ver cual ajusta mejor.
+
+#### Análisis exploratorio.
+
+```{r}
+df <- read.csv("data_frames/Copia de sirenas_endemicas_y_sirenas_migrantes_historico.csv")
+summary(df)
+```
+
+En este caso la especie una variable solamente con dos niveles, tenemos 100 observaciones en nuestro data frame y contamos con cuatro variables explicativas, todas ellas numericas. 
+
+```{r}
+tidy <- gather(df, variable, value, 1:4)
+ggplot(tidy, aes(y=value, x=variable)) + geom_boxplot() + scale_y_log10()
+```
+
+La variable *v4* presenta mucha más variacion que las primeras dos, revisemos si existen correlaciones fuertes entre nusetras variables explicativas. 
+
+```{r}
+corr <- round(cor(df[,-5]), 3)
+ggcorrplot(corr, hc.order = TRUE, lab=TRUE, type="lower",
+   outline.col = "white",
+   colors = c("#6D9EC1", "white", "#E46726"))
+rm(corr)
+```
+
+```{r}
+plot(df[,-5])
+```
+
+Existen varias correlaciones fuertes, intentaremos construir un modelo con todas las variables y despues, si da tiempo, utilizaremos principal component analysis.
+
+```{r}
+set.seed(1234)
+train <- sample(1:nrow(df), size=round(0.8*(nrow(df)), 0), replace = FALSE)
+test <- c(1:nrow(df))[-train]
+train_set <- df[train, c("v1", "v2", "v3", "v4")]
+test_set <- df[test, c("v1", "v2", "v3", "v4")]
+train_scores <- df[train, "especie"]
+test_scores <- df[test, "especie"]
+```
+
+
+```{r}
+set.seed(1234)
+knn_pred <- knn(train_set, test_set, train_scores, k=2)
+table(knn_pred, test_scores)
+```
+
+Con este modelo tenemos todos nuestros datos en el dataset de prueba bien clasificados, las 9 sirenas endemicas fueron clasificadas como tal y las 11 sirenas migrantes.
+
+Veamos los resultados que se obtienen al ajustar un modelo de regresión logistica.
+
+```{r, warning=FALSE}
+glm_fit <- glm(especie ~ v1 + v2 + v3 + v4, data=df, family=binomial, subset=train)
+glm_prob <- predict(glm_fit, test_set, type="response")
+glm_pred <- rep("sirena_endemica", length(test))
+glm_pred[glm_prob>0.5] <- "sirena_migrante"
+mean(glm_pred==test_scores)
+```
+
+Con este algoritmo también tenemos una predicción correcta en todos los casos.
+
+Realizemos las predicciones finales con glm.
+
+```{r}
+prediction_df <- read.csv("data_frames/Copia de sirenas_endemicas_y_sirenas_migrantes.csv")
+
+final_model <- glm(especie ~ v1 + v2 + v3 + v4, data=df, family=binomial)
+glm_prob <- predict(final_model, prediction_df[ , -5], type="response")
+glm_pred <- rep("sirena_endemica", nrow(prediction_df))
+glm_pred[glm_prob>0.5] <- "sirena_migrante"
+
+prediction_df$especie <- glm_pred 
+```
+
+guardemos las predicciones en archivo.
+
+```{r}
+write.csv(prediction_df, "results/sirenas_endemicas_y_sirenas_migrantes_glm.csv", row.names = FALSE)
+```

@@ -176,4 +176,22 @@ plot(df[,-5])
 
 Existen varias correlaciones fuertes, intentaremos construir un modelo con todas las variables y despues, si da tiempo, utilizaremos principal component analysis.
 
+```{r}
+set.seed(1234)
+train <- sample(1:nrow(df), size=round(0.8*(nrow(df)), 0), replace = FALSE)
+test <- c(1:nrow(df))[-train]
+train_set <- df[train, c("v1", "v2", "v3", "v4")]
+test_set <- df[test, c("v1", "v2", "v3", "v4")]
+train_scores <- df[train, "especie"]
+test_scores <- df[test, "especie"]
+```
 
+
+```{r}
+set.seed(1234)
+knn_pred <- knn(train_set, test_set, train_scores, k=2)
+table(knn_pred, test_scores)
+mse_knn <- mean((as.numeric(knn_pred)- test_scores)^2)
+```
+
+Con este modelo tenemos todos nuestros datos en el dataset de prueba bien clasificados, las 9 sirenas endemicas fueron clasificadas como tal y las 11 sirenas migrantes 
