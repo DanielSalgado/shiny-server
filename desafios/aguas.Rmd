@@ -1,0 +1,104 @@
+---
+title: "Aguas Venenosas"
+author: "Daniel Salgado"
+date: "26/2/2017"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+*** 
+Desafío Aguas Venenosas
+Los aldeanos de la isla en la que te encuentras son víctimas de conflictos entre tribus. El método más usado para resolver conflictos ha sido el envenenamiento de aguas enemigas. 
+
+Una de las tribus está diseñando un detector de veneno. Ellos lograron identificar las 10 características mínimas y requeridas que hacen de una sustancia una sustancia venenosa para su especie (*veneno.csv*). Tu has recibido un dataset (*sustancias_diversas.csv*) de 500 sustancias diversas con las 10 características, estas sustancias fueron encontradas en distintos lagos cada una. La idea es clausurar lagos infectados. La tropa que cerrará los lagos infectados tiene sólo 50 miembros, tu debes entregar un dataset con las primeros 50 lagos que cerrará cada miembro de la tropa.
+
+*NB: Tienes una restricción, sólo puedes usar Python y siempre que sea posible la librería Pandas. 
+Usando la librería Pandas de Python, carga tu dataset.
+Una vez que tengas tu dataset de las 500 sustancias, muestra (diagrama de flujo o  dibujo) cómo seleccionar a los 50 prospectos. Muestra cómo filtrarías la base para obtener 50 sustancias.
+Implementa tu proceso de selección en Pandas mostrando los comandos que usas.
+Guarda los 50 sustancias en un archivo nombrado *urgente_orden_de_cierre.csv*
+(Opcional) Si crees que es necesario ordenarlas en algún orden específico, indícalo.
+***
+
+# Opción usando R
+
+Carguemos los datos.
+
+```{r}
+v <- read.csv("data_frames/Copia de veneno.csv")
+s <- read.csv("data_frames/Copia de sustancias_diversas.csv")
+```
+
+Los datos del veneno tienen 11 variables, la primera es la que indica que dicha sustancia es el veneno, las siguientes estan nombradas como v1, v2, ..., v10.
+
+En el data frame de sustancias diversas, la primer columna es un numero entero unico, utilizado para identificar a cada una de las sustancias. 
+
+Como en este ejercicio solamente se cuenta con un dato que corresponde a la sustacia veneno, la mejor manera de determina las 50 sustancias que más probabilidad tienen de ser como el veneno es calcular una distancia entre cada una de ellas y el veneno, para esto, dado que todas las variables son numericas, utilizamos la distancia euclidiana. 
+
+Creemos una nueva columna en nuestro arreglo de sustancias diversas en donde calculemos la distancia entre el veneno y cada sustancia.
+
+Como solo tenemos los datos de un veneno, la opcion más directa es calcular el promedio de las distancias.
+
+```{r}
+s$distancia <- rep(0, nrow(s))
+for(i in 1:nrow(s)){
+  s[i, "distancia"] <- mean(
+  abs(s$X0[i]-v$v1[1]),
+  abs(s$X1[i]-v$v2[1]),
+  abs(s$X2[i]-v$v3[1]),
+  abs(s$X3[i]-v$v4[1]),
+  abs(s$X4[i]-v$v5[1]),
+  abs(s$X5[i]-v$v6[1]),
+  abs(s$X6[i]-v$v7[1]),
+  abs(s$X7[i]-v$v8[1]),
+  abs(s$X8[i]-v$v9[1]),
+  abs(s$X9[i]-v$v10[1])
+)
+}
+```
+
+Las 50 sustancias más parecidas al veneno son las primeros 50 renglones del data frame s ordenado de mayor a menor en la variable *distancia*
+
+Otro criterio para determinar la distancia entre una sustancia y el veneno es MSS, el promedio de las diferencias cuadradas.
+
+```{r}
+s$mss <- rep(0, nrow(s))
+for(i in 1:nrow(s)){
+  s[i, "mss"] <- mean(
+  (s$X0[i]-v$v1[1])^2,
+  (s$X1[i]-v$v2[1])^2,
+  (s$X2[i]-v$v3[1])^2,
+  (s$X3[i]-v$v4[1])^2,
+  (s$X4[i]-v$v5[1])^2,
+  (s$X5[i]-v$v6[1])^2,
+  (s$X6[i]-v$v7[1])^2,
+  (s$X7[i]-v$v8[1])^2,
+  (s$X8[i]-v$v9[1])^2,
+  (s$X9[i]-v$v10[1]^2)
+)
+}
+```
+
+Comparemos las dos medias de distancia.
+```{r}
+ggplot(s, aes(distancia, mss)) + geom_point() + geom_abline(slope = 1)
+```
+
+No parece haber cambio en el orden de las sustancias usando un criterio o el otro.
+```{r}
+mean(head(s[ order(s$distancia), "X"], 50) == head(s[ order(s$mss), "X"], 50))
+```
+
+Al comparar renglon a renglon los datos ya ordenados con cada uno de los criterios, todos los lugares son identicos. 
+
+Guardemos los resultados en un .csv
+
+```{r}
+urgente_orden_de_cierre <-  head(s[ order(s$distancia), 1:11], 50)
+write.csv(urgente_orden_de_cierre, "results/urgente_orden_de_cierre.csv", row.names = FALSE)
+```
+
+
