@@ -5,12 +5,14 @@ date: "26 de febrero de 2017"
 output: html_document
 ---
 
-###Desafio de Aguas venenosas
+###[Desafio de Aguas venenosas](aguas.Rmd)
+######[resultado](results/urgente_orden_de_cierre.csv)
 
 ###[Desafio para hacerla de jamón](jamon.Rmd)
+######[resultado](results/jamones_calificados_lda.csv)
 
 ###[Desafio El Seductor Canto de las Sirenas](sirenas.Rmd)
-
+######[resultado](results/sirenas_endemicas_y_sirenas_migrantes_glm.csv)
 ***
 Malas noticias, estás pres@ en una isla muy lejana, no te angusties, tienes una computadora, internet, comida y asilo. Tu carcelero ha accedido a darte una oportunidad: para salir tienes que resolver tres desafíos, así que sólo tu astucia puede salvarte de quedar, para siempre, aislado.
 
