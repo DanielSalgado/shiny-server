@@ -21,7 +21,9 @@ Una vez que tengas tu dataset de las 500 sustancias, muestra (diagrama de flujo 
 Implementa tu proceso de selección en Pandas mostrando los comandos que usas.
 Guarda los 50 sustancias en un archivo nombrado *urgente_orden_de_cierre.csv*
 (Opcional) Si crees que es necesario ordenarlas en algún orden específico, indícalo.
+
 ***
+
 
 # Opción usando R
 
@@ -38,25 +40,37 @@ En el data frame de sustancias diversas, la primer columna es un numero entero u
 
 Como en este ejercicio solamente se cuenta con un dato que corresponde a la sustacia veneno, la mejor manera de determina las 50 sustancias que más probabilidad tienen de ser como el veneno es calcular una distancia entre cada una de ellas y el veneno, para esto, dado que todas las variables son numericas, utilizamos la distancia euclidiana. 
 
+Tampoco tenemos información de las escalas utilizadas en cada variable, no sabemos si una diferencia de 10 en la variable *X1* es comparable con una diferencia también de 10 en *X2*. Normalizaremos las variables antes de trabajar con ellas.
+
+```{r}
+s[,2:11] <- scale(s[,2:11])
+v[,2:11] <- scale(s[,2:11])
+```
+ 
+Veamos que nuestras variables ahora tienen media 0 y varianza 1
+```{r}
+media <- colMeans(s[,2:11])
+varianza <- apply(s[,2:11], 2, sd)
+print(paste("media = ", media, "; varianza = ", varianza))
+```
+
+
 Creemos una nueva columna en nuestro arreglo de sustancias diversas en donde calculemos la distancia entre el veneno y cada sustancia.
 
 Como solo tenemos los datos de un veneno, la opcion más directa es calcular el promedio de las distancias.
 
 ```{r}
 s$distancia <- rep(0, nrow(s))
+get_dist <- function(sustancia, veneno){
+  s <- sustancia
+  temp <- rep(0, 10)
+  for(i in 2:11){
+    temp[i] <- mean(abs(s[1, i] - veneno[1, i]))
+  }
+  mean(temp)
+}
 for(i in 1:nrow(s)){
-  s[i, "distancia"] <- mean(
-  abs(s$X0[i]-v$v1[1]),
-  abs(s$X1[i]-v$v2[1]),
-  abs(s$X2[i]-v$v3[1]),
-  abs(s$X3[i]-v$v4[1]),
-  abs(s$X4[i]-v$v5[1]),
-  abs(s$X5[i]-v$v6[1]),
-  abs(s$X6[i]-v$v7[1]),
-  abs(s$X7[i]-v$v8[1]),
-  abs(s$X8[i]-v$v9[1]),
-  abs(s$X9[i]-v$v10[1])
-)
+  s[i, "distancia"] <- get_dist(s[i, ], v)
 }
 ```
 
@@ -66,38 +80,42 @@ Otro criterio para determinar la distancia entre una sustancia y el veneno es MS
 
 ```{r}
 s$mss <- rep(0, nrow(s))
+get_mss <- function(sustancia, veneno){
+  s <- sustancia
+  temp <- rep(0, 10)
+  for(i in 2:11){
+    temp[i] <- mean((s[1, i] - veneno[1, i])^2)
+  }
+  mean(temp)
+}
 for(i in 1:nrow(s)){
-  s[i, "mss"] <- mean(
-  (s$X0[i]-v$v1[1])^2,
-  (s$X1[i]-v$v2[1])^2,
-  (s$X2[i]-v$v3[1])^2,
-  (s$X3[i]-v$v4[1])^2,
-  (s$X4[i]-v$v5[1])^2,
-  (s$X5[i]-v$v6[1])^2,
-  (s$X6[i]-v$v7[1])^2,
-  (s$X7[i]-v$v8[1])^2,
-  (s$X8[i]-v$v9[1])^2,
-  (s$X9[i]-v$v10[1]^2)
-)
+  s[i, "mss"] <- get_mss(s[i, ], v)
 }
 ```
 
 Comparemos las dos medias de distancia.
 ```{r}
-ggplot(s, aes(distancia, mss)) + geom_point() + geom_abline(slope = 1)
+ggplot(s, aes(distancia, mss)) + geom_point() + 
+  geom_abline(slope = 1) 
 ```
 
-No parece haber cambio en el orden de las sustancias usando un criterio o el otro.
+Comparemos los criterios.
+
 ```{r}
-mean(head(s[ order(s$distancia), "X"], 50) == head(s[ order(s$mss), "X"], 50))
+sustancias_d <- head(s[ order(s$distancia), "X"], 69) 
+sustancias_mss <- head(s[ order(s$mss), "X"], 69)
+sum(sustancias_mss %in% sustancias_d)
+sum(sustancias_d %in% sustancias_mss)
 ```
 
-Al comparar renglon a renglon los datos ya ordenados con cada uno de los criterios, todos los lugares son identicos. 
+Dentro de los primeros 69 de cada lista, encontramos a 50 en comun. Usemos estas 50 ya que representan una union de ambos criterios.
 
 Guardemos los resultados en un .csv
 
 ```{r}
-urgente_orden_de_cierre <-  head(s[ order(s$distancia), 1:11], 50)
+sustancias_peligrosas <- sustancias_d[sustancias_d %in% sustancias_mss]
+s <- read.csv("data_frames/Copia de sustancias_diversas.csv")
+urgente_orden_de_cierre <-  s[s$X %in% sustancias_peligrosas , 1:11]
 write.csv(urgente_orden_de_cierre, "results/urgente_orden_de_cierre.csv", row.names = FALSE)
 ```
 
